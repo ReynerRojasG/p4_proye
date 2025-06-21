@@ -20,20 +20,22 @@ export default function CursosPage() {
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [busqueda, setBusqueda] = useState("");
 
-  // ✅ Cargar cursos al inicio
   useEffect(() => {
-    fetch("/api/courses")
-      .then((res) => res.json())
-      .then((data) => setCursos(data))
-      .catch((error) => console.error("Error cargando cursos:", error));
-  }, []);
+  fetch("/api/courses")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Respuesta de /api/courses:", data);
+      setCursos(Array.isArray(data) ? data : data.cursos);
+    })
+    .catch((error) => console.error("Error cargando cursos:", error));
+}, []);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
 
-  // Guardar (POST o PUT según si editando)
     const handleSubmit = async () => {
     if (!form.nombre || !form.categoria) return;
 
@@ -52,10 +54,8 @@ export default function CursosPage() {
         if (!response.ok) throw new Error(curso.error || "Error desconocido");
 
         if (editandoId !== null) {
-        // actualizar estado
         setCursos(cursos.map(c => c.curso_id === editandoId ? curso : c));
         } else {
-        // agregar nuevo
         setCursos([...cursos, curso]);
         }
 
@@ -71,8 +71,7 @@ export default function CursosPage() {
     setEditandoId(curso.curso_id);
   };
 
-  // Eliminar curso (DELETE)
-    const eliminarCurso = async (id: number) => {
+  const eliminarCurso = async (id: number) => {
     try {
         const response = await fetch(`/api/courses/${id}`, { method: "DELETE" });
         const result = await response.json();
@@ -85,7 +84,7 @@ export default function CursosPage() {
     } catch (error) {
         console.error("Error al eliminar curso:", error);
     }
-    };
+  };
 
   const cursosFiltrados = cursos.filter((c) =>
     c.nombre.toLowerCase().includes(busqueda.toLowerCase())
@@ -95,7 +94,7 @@ export default function CursosPage() {
         <div className="p-4 text-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Formulario */}
-                <div className="glassmorphism p-6 rounded-3xl border border-white/30 h-[700px] flex flex-col justify-between">
+                <div className="glassmorphism p-6 rounded-3xl border border-white/30 h-[700px] max-w-[600] flex flex-col justify-between">
                     <div>
                         <h2 className="text-2xl font-bold mb-6">Registro de Cursos</h2>
 
@@ -196,7 +195,7 @@ export default function CursosPage() {
 
 
                 {/* Lista de Cursos */}
-                <div className="glassmorphism p-4 rounded-2xl border border-white/30 h-[700px] flex flex-col overflow-visible">
+                <div className="glassmorphism p-4 rounded-2xl border border-white/30 h-[700px]  max-w-[600px] flex flex-col overflow-visible">
                     <h3 className="text-lg font-semibold mb-4">Cursos registrados</h3>
 
                     <input
@@ -211,7 +210,7 @@ export default function CursosPage() {
                             {cursosFiltrados.map((c) => (
                                 <li
                                     key={c.curso_id}
-                                    className="p-4 rounded-2xl border border-white/20 backdrop-blur-md bg-gradient-to-br from-purple-600/30 via-indigo-600/20 to-purple-500/30 shadow-lg transition-all duration-200 hover:scale-[1.04] transform-gpu will-change-transform"
+                                    className="flex flex-col justify-between p-4 rounded-2xl border border-white/20 backdrop-blur-md bg-gradient-to-br from-purple-600/30 via-indigo-600/20 to-purple-500/30 shadow-lg transition-all duration-200 hover:scale-[1.04] transform-gpu will-change-transform"
                                 >
                                     <div className="space-y-1 text-sm">
                                         <p><span className="font-bold">Nombre:</span> {c.nombre}</p>
@@ -221,7 +220,7 @@ export default function CursosPage() {
                                         <p><span className="font-bold">Modalidad:</span> {c.modalidad}</p>
                                         <p><span className="font-bold">Descripción:</span> {c.descripcion}</p>
                                     </div>
-                                    <div className="flex justify-end mt-2 gap-2">
+                                    <div className="flex justify-end gap-2 mt-auto pt-4">
                                         <button onClick={() => iniciarEdicion(c)} className="hover:text-indigo-500">
                                             <PencilIcon className="h-5 w-5" />
                                         </button>
