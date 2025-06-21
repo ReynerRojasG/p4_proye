@@ -94,7 +94,7 @@ export default function CursosPage() {
         <div className="p-4 text-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Formulario */}
-                <div className="glassmorphism p-6 rounded-3xl border border-white/30 h-[700px] max-w-[600] flex flex-col justify-between">
+                <div className="glassmorphism p-6 rounded-3xl border border-white/30 h-[700px] flex flex-col justify-between">
                     <div>
                         <h2 className="text-2xl font-bold mb-6">Registro de Cursos</h2>
 
