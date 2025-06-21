@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 
-// 👇 No tipés tú el `params` manualmente (eso es lo que rompe el build en Vercel)
 export async function PUT(
   req: NextRequest,
   context: any

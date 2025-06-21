@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../lib/prisma";
 
-// PUT /api/graduates/[id]
 export async function PUT(req: NextRequest, context: any) {
   try {
     const graduadoId = parseInt(context.params.id);
