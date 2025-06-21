@@ -1,22 +1,20 @@
-// app/api/exhibitors/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from '../../../lib/prisma';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const exponenteId = parseInt(params.id);
+    const exponenteId = parseInt(context.params.id);
     const body = await req.json();
 
     const {
       persona,
       especialidad,
-      cursos, // array de curso_id
+      cursos,
     } = body;
 
-    // Buscar exponente existente
     const exponente = await prisma.gra_exponentes.findUnique({
       where: { exponente_id: exponenteId },
     });
@@ -27,7 +25,6 @@ export async function PUT(
         { status: 404 }
       );
 
-    // Actualizar persona asociada
     if (exponente.persona_id && persona) {
       await prisma.gra_personas.update({
         where: { persona_id: exponente.persona_id },
@@ -45,18 +42,15 @@ export async function PUT(
       });
     }
 
-    // Actualizar exponente (especialidad)
     await prisma.gra_exponentes.update({
       where: { exponente_id: exponenteId },
       data: { especialidad },
     });
 
-    // Borrar asociaciones antiguas de cursos
     await prisma.gra_exponentexcurso.deleteMany({
       where: { exponente_id: exponenteId },
     });
 
-    // Crear asociaciones nuevas de cursos
     if (Array.isArray(cursos) && cursos.length > 0) {
       await prisma.gra_exponentexcurso.createMany({
         data: cursos.map((curso_id: number) => ({
@@ -78,12 +72,11 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const exponenteId = parseInt(params.id);
+    const exponenteId = parseInt(context.params.id);
 
-    // Buscar exponente existente
     const exponente = await prisma.gra_exponentes.findUnique({
       where: { exponente_id: exponenteId },
     });
@@ -94,17 +87,14 @@ export async function DELETE(
         { status: 404 }
       );
 
-    // Borrar asociaciones de cursos
     await prisma.gra_exponentexcurso.deleteMany({
       where: { exponente_id: exponenteId },
     });
 
-    // Borrar exponente
     await prisma.gra_exponentes.delete({
       where: { exponente_id: exponenteId },
     });
 
-    // Borrar persona asociada (opcional: solo si no está asociada a otros registros)
     if (exponente.persona_id) {
       await prisma.gra_personas.delete({
         where: { persona_id: exponente.persona_id },
