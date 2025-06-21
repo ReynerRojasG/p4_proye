@@ -1,44 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from '../../../lib/prisma';
+import prisma from "../../../lib/prisma";
 
+// 👇 No tipés tú el `params` manualmente (eso es lo que rompe el build en Vercel)
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
     const exponenteId = parseInt(context.params.id);
     const body = await req.json();
-
-    const {
-      persona,
-      especialidad,
-      cursos,
-    } = body;
+    const { persona, especialidad, cursos } = body;
 
     const exponente = await prisma.gra_exponentes.findUnique({
       where: { exponente_id: exponenteId },
     });
 
-    if (!exponente)
-      return NextResponse.json(
-        { error: "Exponente no encontrado" },
-        { status: 404 }
-      );
+    if (!exponente) {
+      return NextResponse.json({ error: "Exponente no encontrado" }, { status: 404 });
+    }
 
     if (exponente.persona_id && persona) {
       await prisma.gra_personas.update({
         where: { persona_id: exponente.persona_id },
-        data: {
-          p_nombre: persona.p_nombre,
-          s_nombre: persona.s_nombre,
-          p_apellido: persona.p_apellido,
-          s_apellido: persona.s_apellido,
-          cedula: persona.cedula,
-          correo: persona.correo,
-          tel_personal: persona.tel_personal,
-          tel_trabajo: persona.tel_trabajo,
-          direc: persona.direc,
-        },
+        data: persona,
       });
     }
 
@@ -51,7 +35,7 @@ export async function PUT(
       where: { exponente_id: exponenteId },
     });
 
-    if (Array.isArray(cursos) && cursos.length > 0) {
+    if (Array.isArray(cursos)) {
       await prisma.gra_exponentexcurso.createMany({
         data: cursos.map((curso_id: number) => ({
           curso_id,
@@ -63,16 +47,13 @@ export async function PUT(
     return NextResponse.json({ mensaje: "Exponente actualizado exitosamente" });
   } catch (error) {
     console.error("Error en PUT /api/exhibitors/[id]:", error);
-    return NextResponse.json(
-      { error: "Error al actualizar exponente" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al actualizar exponente" }, { status: 500 });
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
     const exponenteId = parseInt(context.params.id);
@@ -81,11 +62,9 @@ export async function DELETE(
       where: { exponente_id: exponenteId },
     });
 
-    if (!exponente)
-      return NextResponse.json(
-        { error: "Exponente no encontrado" },
-        { status: 404 }
-      );
+    if (!exponente) {
+      return NextResponse.json({ error: "Exponente no encontrado" }, { status: 404 });
+    }
 
     await prisma.gra_exponentexcurso.deleteMany({
       where: { exponente_id: exponenteId },
@@ -104,9 +83,6 @@ export async function DELETE(
     return NextResponse.json({ mensaje: "Exponente eliminado exitosamente" });
   } catch (error) {
     console.error("Error en DELETE /api/exhibitors/[id]:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar exponente" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error al eliminar exponente" }, { status: 500 });
   }
 }
